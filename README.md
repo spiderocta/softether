@@ -495,6 +495,79 @@ sudo tar xzf /root/vpnserver_backup_20240207.tar.gz -C /opt/
 sudo systemctl restart vpnserver
 ```
 
+# FIX : Use Local Bridge (More Advanced - Direct Network Access)
+- This method creates a true bridge between the VPN and your physical network. VPN clients become actual members of your LAN.
+
+1- Disable secureNat 
+
+```bash
+cd /opt/vpnserver
+sudo ./vpncmd localhost /SERVER /HUB:CompanyVPN
+```
+
+```bash
+VPN Server/CompanyVPN> SecureNatDisable
+VPN Server/CompanyVPN> exit
+```
+
+## Step 2: Create Local Bridge
+```bash
+# First, find your network interface name
+VPN Server> ?
+
+# Check your network interfaces
+exit
+```
+
+```bash
+ip addr show
+```
+
+- Look for your network interface (usually ens160, ens192, eth0, etc.). Note the name.
+
+```bash
+# Back to vpncmd
+sudo ./vpncmd localhost /SERVER
+```
+
+```
+# Back to vpncmd
+sudo ./vpncmd localhost /SERVER
+```
+
+```bash
+# Create bridge (replace 'ens160' with your actual interface name)
+VPN Server> BridgeCreate CompanyVPN /DEVICE:ens160
+
+# Verify bridge
+VPN Server> BridgeList
+```
+
+### Step 3: Configure Network Interface
+- Your Linux VM's network interface needs to be in promiscuous mode:
+
+```bash
+exit
+
+# Replace ens160 with your interface name
+sudo ip link set ens160 promisc on
+
+# Make it permanent
+sudo nano /etc/rc.local
+
+```
+
+- Add this line (replace ens160 with your interface):
+
+```bash
+#!/bin/bash
+ip link set ens160 promisc on
+exit 0
+```
+
+```bash
+sudo chmod +x /etc/rc.local
+```
 
 
 
